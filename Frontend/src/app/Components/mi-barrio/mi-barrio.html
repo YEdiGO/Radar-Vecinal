@@ -1,0 +1,117 @@
+<div class="d-flex align-items-center mb-3">
+  <div>
+    <small class="text-muted">Sector residencial · Huancayo</small>
+    <h1 class="h3 mb-0">Mi barrio: {{ nombreBarrio() }}</h1>
+  </div>
+  <a routerLink="/reportes/nuevo" class="btn btn-radar ms-auto"
+    ><i class="bi bi-plus-lg"></i> Reportar en mi barrio</a
+  >
+</div>
+
+@if (zona(); as z) {
+  <div class="row g-3 mb-3">
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="small text-muted">Temperatura del barrio</div>
+          <div class="display-5">{{ z.temperatura }}</div>
+          <span class="badge" [class]="badge[z.nivel]">{{ etiquetaNivel[z.nivel] }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="small text-muted">Reportes (últimos 7 días)</div>
+          <div class="display-5">{{ reportes7() }}</div>
+          <div class="small text-muted">{{ z.cantidad }} en 30 días</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="small text-muted mb-1">Incidentes recurrentes</div>
+          @for (t of z.tipos_frecuentes; track t.tipo) {
+            <div class="d-flex justify-content-between small">
+              <span>{{ etiquetaTipo[t.tipo] }}</span
+              ><strong>{{ t.cantidad }}</strong>
+            </div>
+          } @empty {
+            <span class="small text-muted">Sin reportes recientes.</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-patch-check"></i> Noticias y respuestas oficiales
+      </div>
+      <div class="list-group list-group-flush">
+        @for (a of acciones(); track a.id) {
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between">
+              <strong>{{ a.titulo }}</strong>
+              <span
+                class="badge"
+                [class]="
+                  a.estado === 'Completada'
+                    ? 'text-bg-success'
+                    : a.estado === 'En ejecución'
+                      ? 'text-bg-primary'
+                      : 'text-bg-secondary'
+                "
+                >{{ a.estado }}</span
+              >
+            </div>
+            <div class="small text-muted">
+              {{ a.institucion }} · {{ a.tipo }} · {{ a.fecha | date: 'dd/MM/yyyy' }}
+            </div>
+            <p class="mb-1 small">{{ a.descripcion }}</p>
+            @if (
+              a.estado === 'Completada' &&
+              a.temperatura_al_registrar !== null &&
+              a.temperatura_al_completar !== null
+            ) {
+              <span class="small">
+                Impacto: {{ a.temperatura_al_registrar }} →
+                <strong>{{ a.temperatura_al_completar }}</strong>
+                @if (a.temperatura_al_completar < a.temperatura_al_registrar) {
+                  <i class="bi bi-arrow-down text-success"></i>
+                }
+              </span>
+            }
+          </div>
+        } @empty {
+          <div class="list-group-item text-muted">
+            La Municipalidad aún no registró acciones en tu barrio.
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between">
+        <span class="fw-semibold"><i class="bi bi-megaphone"></i> Iniciativas vecinales</span>
+        <a routerLink="/iniciativas" class="small">Ver todas</a>
+      </div>
+      <div class="list-group list-group-flush">
+        @for (i of iniciativas(); track i.id) {
+          <div class="list-group-item">
+            <strong>{{ i.titulo }}</strong>
+            <div class="small text-muted">{{ i.estado }} · {{ i.participantes }} participantes</div>
+          </div>
+        } @empty {
+          <div class="list-group-item text-muted">No hay iniciativas en tu barrio.</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,96 @@
+<form class="card shadow-sm" (submit)="guardar($event)" novalidate>
+  <div class="card-header bg-white fw-semibold">Registrar acción</div>
+  <div class="card-body">
+    @if (error()) {
+      <div class="alert alert-danger py-2">{{ error() }}</div>
+    }
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label" for="a-barrio">Barrio</label>
+        <select
+          id="a-barrio"
+          class="form-select"
+          [formField]="formulario.id_barrio"
+          [class.is-invalid]="formulario.id_barrio().touched() && formulario.id_barrio().invalid()"
+        >
+          <option value="">Selecciona…</option>
+          @for (b of barrios(); track b.id) {
+            <option [value]="b.id">{{ b.nombre }}</option>
+          }
+        </select>
+        @if (formulario.id_barrio().touched() && formulario.id_barrio().invalid()) {
+          <div class="invalid-feedback">{{ formulario.id_barrio().errors()[0].message }}</div>
+        }
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label" for="a-tipo">Tipo</label>
+        <select id="a-tipo" class="form-select" [formField]="formulario.tipo">
+          @for (t of tiposAccion; track t) {
+            <option [value]="t">{{ t }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label" for="a-titulo">Título</label>
+        <input
+          id="a-titulo"
+          class="form-control"
+          [formField]="formulario.titulo"
+          [class.is-invalid]="formulario.titulo().touched() && formulario.titulo().invalid()"
+        />
+        @if (formulario.titulo().touched() && formulario.titulo().invalid()) {
+          <div class="invalid-feedback">{{ formulario.titulo().errors()[0].message }}</div>
+        }
+      </div>
+
+      <div class="col-12">
+        <label class="form-label" for="a-desc">Descripción</label>
+        <textarea
+          id="a-desc"
+          rows="3"
+          class="form-control"
+          [formField]="formulario.descripcion"
+          [class.is-invalid]="
+            formulario.descripcion().touched() && formulario.descripcion().invalid()
+          "
+        ></textarea>
+        @if (formulario.descripcion().touched() && formulario.descripcion().invalid()) {
+          <div class="invalid-feedback">{{ formulario.descripcion().errors()[0].message }}</div>
+        }
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label" for="a-fecha">Fecha</label>
+        <input
+          id="a-fecha"
+          type="date"
+          class="form-control"
+          [formField]="formulario.fecha"
+          [class.is-invalid]="formulario.fecha().touched() && formulario.fecha().invalid()"
+        />
+        @if (formulario.fecha().touched() && formulario.fecha().invalid()) {
+          <div class="invalid-feedback">{{ formulario.fecha().errors()[0].message }}</div>
+        }
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label" for="a-estado">Estado</label>
+        <select id="a-estado" class="form-select" [formField]="formulario.estado">
+          @for (e of estados; track e) {
+            <option [value]="e">{{ e }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer bg-white text-end">
+    <button class="btn btn-radar" [disabled]="cargando()">
+      @if (cargando()) {
+        <span class="spinner-border spinner-border-sm"></span>
+      }
+      Guardar acción
+    </button>
+  </div>
+</form>

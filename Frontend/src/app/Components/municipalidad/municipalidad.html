@@ -1,0 +1,274 @@
+<div class="mb-3">
+  <h1 class="h4 mb-0">Gerencia de Seguridad Ciudadana</h1>
+  <small class="text-muted">Municipalidad Provincial de Huancayo · Respuesta y seguimiento</small>
+</div>
+
+<ul class="nav nav-pills mb-3 gap-1">
+  <li class="nav-item">
+    <button
+      class="nav-link"
+      [class.active]="pestana() === 'criticos'"
+      (click)="pestana.set('criticos')"
+    >
+      <i class="bi bi-exclamation-triangle"></i> Barrios críticos
+      @if (criticos().length) {
+        <span class="badge text-bg-danger ms-1">{{ criticos().length }}</span>
+      }
+    </button>
+  </li>
+  <li class="nav-item">
+    <button
+      class="nav-link"
+      [class.active]="pestana() === 'acciones'"
+      (click)="pestana.set('acciones')"
+    >
+      <i class="bi bi-clipboard-check"></i> Mis acciones
+    </button>
+  </li>
+  <li class="nav-item">
+    <button
+      class="nav-link"
+      [class.active]="pestana() === 'moderacion'"
+      (click)="pestana.set('moderacion')"
+    >
+      <i class="bi bi-shield-check"></i> Moderación
+    </button>
+  </li>
+  <li class="nav-item">
+    <button
+      class="nav-link"
+      [class.active]="pestana() === 'estadisticas'"
+      (click)="pestana.set('estadisticas')"
+    >
+      <i class="bi bi-bar-chart"></i> Estadísticas
+    </button>
+  </li>
+</ul>
+
+@if (error()) {
+  <div class="alert alert-danger py-2">{{ error() }}</div>
+}
+
+@switch (pestana()) {
+  @case ('criticos') {
+    <p class="text-muted small">
+      Barrios en nivel Alerta o Crítico sin acción registrada en los últimos 15 días.
+    </p>
+    <div class="row g-3">
+      @for (z of criticos(); track z.id) {
+        <div class="col-md-6 col-xl-4">
+          <div
+            class="card shadow-sm h-100 border-start border-4"
+            [class.border-danger]="z.nivel === 'rojo'"
+            [class.border-warning]="z.nivel === 'naranja'"
+          >
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <h2 class="h5 mb-0">{{ z.nombre }}</h2>
+                <span class="badge" [class]="badge[z.nivel]">{{ etiquetaNivel[z.nivel] }}</span>
+              </div>
+              <div class="display-6 my-2">{{ z.temperatura }}</div>
+              <div class="small text-muted mb-2">
+                {{ z.cantidad }} reportes · sin acción en 15 días
+              </div>
+              @for (t of z.tipos_frecuentes; track t.tipo) {
+                <div class="small d-flex justify-content-between">
+                  <span>{{ etiquetaTipo[t.tipo] }}</span
+                  ><strong>{{ t.cantidad }}</strong>
+                </div>
+              }
+            </div>
+            <div class="card-footer bg-white">
+              <button class="btn btn-danger btn-sm w-100" (click)="registrarEn(z.id)">
+                <i class="bi bi-plus-lg"></i> Registrar acción
+              </button>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="col-12">
+          <div class="alert alert-success">
+            No hay barrios críticos sin atención. ¡Buen trabajo!
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @case ('acciones') {
+    <div class="row g-3">
+      <div class="col-lg-5">
+        <app-accion-form [idBarrioInicial]="barrioParaAccion()" (guardada)="accionGuardada()" />
+      </div>
+      <div class="col-lg-7">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white fw-semibold">Mis acciones</div>
+          <div class="list-group list-group-flush">
+            @for (a of acciones(); track a.id) {
+              <div class="list-group-item">
+                <div class="d-flex justify-content-between">
+                  <strong>{{ a.titulo }}</strong>
+                  <span class="badge" [class]="badgeEstado(a.estado)">{{ a.estado }}</span>
+                </div>
+                <div class="small text-muted">
+                  {{ a.barrio_nombre }} · {{ a.tipo }} · {{ a.fecha | date: 'dd/MM/yyyy' }}
+                </div>
+                <div class="row text-center g-2 mt-1">
+                  <div class="col-6">
+                    <div class="border rounded p-1 small">
+                      Al registrar
+                      <div class="fw-semibold">{{ a.temperatura_al_registrar ?? '—' }}</div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="border rounded p-1 small">
+                      Al completar
+                      <div class="fw-semibold">{{ a.temperatura_al_completar ?? '—' }}</div>
+                    </div>
+                  </div>
+                </div>
+                @if (a.estado !== 'Completada') {
+                  <div class="mt-2 d-flex gap-1">
+                    @if (a.estado === 'Planificada') {
+                      <button
+                        class="btn btn-sm btn-outline-primary"
+                        (click)="cambiarEstado(a, 'En ejecución')"
+                      >
+                        Iniciar ejecución
+                      </button>
+                    }
+                    <button
+                      class="btn btn-sm btn-outline-success"
+                      (click)="cambiarEstado(a, 'Completada')"
+                    >
+                      Marcar completada
+                    </button>
+                  </div>
+                }
+              </div>
+            } @empty {
+              <div class="list-group-item text-muted">Aún no registraste acciones.</div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @case ('moderacion') {
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Fecha</th>
+              <th>Barrio</th>
+              <th>Tipo</th>
+              <th>Descripción</th>
+              <th>Votos</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of reportes(); track r.id) {
+              <tr>
+                <td class="small">{{ r.fecha | date: 'dd/MM HH:mm' }}</td>
+                <td>{{ r.barrio_nombre }}</td>
+                <td>{{ etiquetaTipo[r.tipo] }}</td>
+                <td class="small">{{ r.descripcion }}</td>
+                <td class="small text-nowrap">
+                  👍 {{ r.confirmaciones }} · 👎 {{ r.incorrectos }}
+                </td>
+                <td>
+                  <span class="badge text-bg-light border">{{ r.estado }}</span>
+                </td>
+                <td class="text-nowrap">
+                  @if (r.estado === 'falso' || r.estado === 'archivado') {
+                    <button class="btn btn-sm btn-outline-secondary" (click)="moderar(r, 'activo')">
+                      Restaurar
+                    </button>
+                  } @else {
+                    <button class="btn btn-sm btn-outline-danger" (click)="moderar(r, 'falso')">
+                      Falso
+                    </button>
+                    <button class="btn btn-sm btn-outline-dark" (click)="moderar(r, 'archivado')">
+                      Archivar
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @case ('estadisticas') {
+    @if (stats(); as s) {
+      <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <div class="small text-muted">Vecinos registrados</div>
+              <div class="display-6">{{ s.vecinos_registrados }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <div class="small text-muted">Reportes (30 días)</div>
+              <div class="display-6">{{ s.reportes_30d }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <div class="small text-muted">Reportes falsos</div>
+              <div class="display-6">{{ s.reportes_falsos_pct }}%</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <div class="small text-muted">Reducción prom. de temp.</div>
+              <div class="display-6">{{ s.reduccion_promedio ?? '—' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold">Reportes por tipo</div>
+            <ul class="list-group list-group-flush">
+              @for (t of tiposStats(); track t[0]) {
+                <li class="list-group-item d-flex justify-content-between">
+                  {{ etiquetaTipo[t[0]] }}<strong>{{ t[1] }}</strong>
+                </li>
+              } @empty {
+                <li class="list-group-item text-muted">Sin datos.</li>
+              }
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold">Barrios por nivel</div>
+            <ul class="list-group list-group-flush">
+              @for (n of nivelesStats(); track n[0]) {
+                <li class="list-group-item d-flex justify-content-between text-capitalize">
+                  {{ n[0] }}<strong>{{ n[1] }}</strong>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    }
+  }
+}

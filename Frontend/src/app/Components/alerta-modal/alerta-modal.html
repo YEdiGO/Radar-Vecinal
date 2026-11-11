@@ -1,0 +1,98 @@
+<div class="modal-backdrop fade show"></div>
+<div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" (submit)="transmitir($event)" novalidate>
+      <div class="modal-header">
+        <div>
+          <div class="small text-danger fw-semibold">ALERTA DE EMERGENCIA ZONAL</div>
+          <h2 class="modal-title h5">Activación barrial inmediata</h2>
+        </div>
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Cerrar"
+          (click)="cerrar.emit()"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        @if (enviada()) {
+          <div class="alert alert-success mb-0">
+            <i class="bi bi-check-circle"></i> Alerta transmitida. Permanecerá visible 30 minutos
+            para los vecinos.
+          </div>
+        } @else {
+          <div class="alert alert-danger small">
+            <strong>Para emergencias vitales o flagrancia, llama primero al 105.</strong> Esta
+            alerta es un aviso comunitario.
+          </div>
+          <div class="row text-center g-2 mb-3 small">
+            <div class="col-4">
+              <div class="border rounded p-2"><strong>PNP 105</strong><br />Central policial</div>
+            </div>
+            <div class="col-4">
+              <div class="border rounded p-2"><strong>Serenazgo</strong><br />(064) 223350</div>
+            </div>
+            <div class="col-4">
+              <div class="border rounded p-2"><strong>SAMU 106</strong><br />Ambulancia</div>
+            </div>
+          </div>
+
+          @if (error()) {
+            <div class="alert alert-warning py-2">{{ error() }}</div>
+          }
+
+          <div class="mb-3">
+            <label class="form-label" for="al-barrio">Sector donde ocurre</label>
+            <select
+              id="al-barrio"
+              class="form-select"
+              [formField]="formulario.id_barrio"
+              [class.is-invalid]="
+                formulario.id_barrio().touched() && formulario.id_barrio().invalid()
+              "
+            >
+              <option value="">Selecciona…</option>
+              @for (b of barrios(); track b.id) {
+                <option [value]="b.id">{{ b.nombre }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="al-motivo">Motivo</label>
+            <select id="al-motivo" class="form-select" [formField]="formulario.motivo">
+              @for (m of motivos; track m) {
+                <option [value]="m">{{ m }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="mb-0">
+            <label class="form-label" for="al-ub">Ubicación exacta / calle</label>
+            <input
+              id="al-ub"
+              class="form-control"
+              placeholder="Ej. Esquina Jr. Ayacucho con Av. Real"
+              [formField]="formulario.ubicacion"
+            />
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="cerrar.emit()">
+          {{ enviada() ? 'Cerrar' : 'Cancelar' }}
+        </button>
+        @if (!enviada()) {
+          <button class="btn btn-danger" [disabled]="cargando()">
+            @if (cargando()) {
+              <span class="spinner-border spinner-border-sm"></span>
+            }
+            <i class="bi bi-broadcast"></i> Transmitir alerta a vecinos
+          </button>
+        }
+      </div>
+    </form>
+  </div>
+</div>
