@@ -1,0 +1,77 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-radar sticky-top shadow-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" [routerLink]="auth.inicio()">
+      <i class="bi bi-radar text-info"></i> Radar Vecinal
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      (click)="abierto.set(!abierto())"
+      aria-label="Menú"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="navbar-collapse collapse" [class.show]="abierto()">
+      <ul class="navbar-nav me-auto" (click)="abierto.set(false)">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <i class="bi bi-map"></i> Mapa
+          </a>
+        </li>
+        @if (auth.esMunicipalidad()) {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/municipalidad" routerLinkActive="active">
+              <i class="bi bi-bank"></i> Municipalidad
+            </a>
+          </li>
+        } @else {
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/mi-barrio" routerLinkActive="active"
+              ><i class="bi bi-house-heart"></i> Mi barrio</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/reportes" routerLinkActive="active"
+              ><i class="bi bi-list-check"></i> Reportes</a
+            >
+          </li>
+        }
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/iniciativas" routerLinkActive="active"
+            ><i class="bi bi-megaphone"></i> Iniciativas</a
+          >
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/acerca-de" routerLinkActive="active"
+            ><i class="bi bi-info-circle"></i> Acerca de</a
+          >
+        </li>
+      </ul>
+
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <button class="btn btn-danger btn-sm" (click)="alertaAbierta.set(true)">
+          <i class="bi bi-bell-fill"></i> Alerta barrial
+        </button>
+        <span class="text-light small">
+          <i class="bi bi-person-circle"></i> {{ auth.usuario()?.nombre }}
+          <span class="badge text-bg-info ms-1">{{
+            auth.esMunicipalidad() ? 'Municipalidad' : 'Vecino'
+          }}</span>
+        </span>
+        <button class="btn btn-outline-light btn-sm" (click)="auth.salir()">
+          <i class="bi bi-box-arrow-right"></i> Salir
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+@if (alertaAbierta()) {
+  <app-alerta-modal (cerrar)="alertaAbierta.set(false)" />
+}

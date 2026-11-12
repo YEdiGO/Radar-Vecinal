@@ -1,0 +1,86 @@
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <form class="card shadow-sm" (submit)="guardar($event)" novalidate>
+      <div class="card-header bg-white fw-semibold">Proponer iniciativa vecinal</div>
+      <div class="card-body">
+        @if (error()) {
+          <div class="alert alert-danger py-2">{{ error() }}</div>
+        }
+
+        <div class="mb-3">
+          <label class="form-label" for="barrio">Barrio</label>
+          <select
+            id="barrio"
+            class="form-select"
+            [formField]="formulario.id_barrio"
+            [class.is-invalid]="
+              formulario.id_barrio().touched() && formulario.id_barrio().invalid()
+            "
+          >
+            <option value="">Selecciona…</option>
+            @for (b of barrios(); track b.id) {
+              <option [value]="b.id">{{ b.nombre }}</option>
+            }
+          </select>
+          @if (formulario.id_barrio().touched() && formulario.id_barrio().invalid()) {
+            <div class="invalid-feedback">{{ formulario.id_barrio().errors()[0].message }}</div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="titulo">Título</label>
+          <input
+            id="titulo"
+            class="form-control"
+            placeholder="Ej. Ronda de vecinos vigilantes"
+            [formField]="formulario.titulo"
+            [class.is-invalid]="formulario.titulo().touched() && formulario.titulo().invalid()"
+          />
+          @if (formulario.titulo().touched() && formulario.titulo().invalid()) {
+            <div class="invalid-feedback">{{ formulario.titulo().errors()[0].message }}</div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="desc">Descripción</label>
+          <textarea
+            id="desc"
+            rows="3"
+            class="form-control"
+            [formField]="formulario.descripcion"
+            [class.is-invalid]="
+              formulario.descripcion().touched() && formulario.descripcion().invalid()
+            "
+          ></textarea>
+          @if (formulario.descripcion().touched() && formulario.descripcion().invalid()) {
+            <div class="invalid-feedback">{{ formulario.descripcion().errors()[0].message }}</div>
+          }
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="meta">Meta</label>
+          <input
+            id="meta"
+            class="form-control"
+            placeholder="Ej. 25 vecinos inscritos"
+            [formField]="formulario.meta"
+            [class.is-invalid]="formulario.meta().touched() && formulario.meta().invalid()"
+          />
+          @if (formulario.meta().touched() && formulario.meta().invalid()) {
+            <div class="invalid-feedback">{{ formulario.meta().errors()[0].message }}</div>
+          }
+        </div>
+
+        <div class="d-flex gap-2">
+          <a routerLink="/iniciativas" class="btn btn-outline-secondary">Cancelar</a>
+          <button class="btn btn-radar flex-grow-1" [disabled]="cargando()">
+            @if (cargando()) {
+              <span class="spinner-border spinner-border-sm"></span>
+            }
+            Publicar iniciativa
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
