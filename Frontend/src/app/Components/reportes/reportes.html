@@ -1,0 +1,82 @@
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <h1 class="h4 mb-0">Reportes</h1>
+  <div class="btn-group ms-2">
+    <button
+      class="btn btn-sm"
+      [class]="vista() === 'barrio' ? 'btn-dark' : 'btn-outline-dark'"
+      (click)="vista.set('barrio')"
+    >
+      Mi barrio
+    </button>
+    <button
+      class="btn btn-sm"
+      [class]="vista() === 'mios' ? 'btn-dark' : 'btn-outline-dark'"
+      (click)="vista.set('mios')"
+    >
+      Mis reportes
+    </button>
+  </div>
+  <a routerLink="/reportes/nuevo" class="btn btn-radar btn-sm ms-auto"
+    ><i class="bi bi-plus-lg"></i> Nuevo reporte</a
+  >
+</div>
+
+@if (error()) {
+  <div class="alert alert-danger py-2">{{ error() }}</div>
+}
+@if (res.isLoading()) {
+  <div class="text-center py-5"><span class="spinner-border"></span></div>
+}
+
+<div class="row g-3">
+  @for (r of reportes(); track r.id) {
+    <div class="col-md-6 col-xl-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="fw-semibold">{{ etiquetaTipo[r.tipo] }}</span>
+            <span class="badge" [class]="badge(r.estado)">{{ r.estado }}</span>
+          </div>
+          <div class="small text-muted mb-2">
+            <i class="bi bi-geo-alt"></i> {{ r.barrio_nombre }} ·
+            {{ r.fecha | date: 'dd/MM/yyyy HH:mm' }}
+            @if (r.es_mio) {
+              · <span class="text-primary">tuyo</span>
+            }
+          </div>
+          <p class="mb-2">{{ r.descripcion }}</p>
+          <div class="small">
+            <i class="bi bi-hand-thumbs-up text-success"></i> {{ r.confirmaciones }}
+            <i class="bi bi-hand-thumbs-down text-danger ms-2"></i> {{ r.incorrectos }}
+          </div>
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+          @if (r.es_mio) {
+            <button class="btn btn-sm btn-outline-danger ms-auto" (click)="eliminar(r)">
+              <i class="bi bi-trash"></i> Eliminar
+            </button>
+          } @else {
+            <button
+              class="btn btn-sm"
+              [class]="r.mi_voto === 'confirmo' ? 'btn-success' : 'btn-outline-success'"
+              (click)="votar(r, 'confirmo')"
+            >
+              <i class="bi bi-check2"></i> Lo confirmo
+            </button>
+            <button
+              class="btn btn-sm"
+              [class]="r.mi_voto === 'incorrecto' ? 'btn-danger' : 'btn-outline-danger'"
+              (click)="votar(r, 'incorrecto')"
+            >
+              <i class="bi bi-x-lg"></i> Es falso
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  } @empty {
+    @if (!res.isLoading()) {
+      <p class="text-muted">No hay reportes para mostrar.</p>
+    }
+  }
+</div>

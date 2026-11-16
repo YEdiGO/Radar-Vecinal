@@ -1,1 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
+body { background: #f1f5f9; min-height: 100vh; }
+.mapa-contenedor { width: 100%; border-radius: .375rem; z-index: 0; }
+.bg-radar { background: #062a44; }
+.btn-radar { background: #00a884; border-color: #00a884; color: #fff; }
+.btn-radar:hover { background: #008f70; border-color: #008f70; color: #fff; }
+.leyenda-punto { display: inline-block; width: .8rem; height: .8rem; border-radius: 50%; }
+.text-bg-orange { color: #fff; background-color: #fd7e14; }

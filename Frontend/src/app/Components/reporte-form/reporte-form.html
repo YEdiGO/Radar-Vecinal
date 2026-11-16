@@ -1,0 +1,88 @@
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">
+        <span class="badge text-bg-dark me-1">1</span> Marca el lugar del incidente
+      </div>
+      <app-mapa-calor
+        [zonas]="zonas()"
+        [marcador]="marcador()"
+        [seleccionable]="true"
+        altura="55vh"
+        (mapaClick)="elegirPunto($event)"
+      />
+      <div class="card-footer bg-white small">
+        @if (marcador(); as m) {
+          <i class="bi bi-geo-alt-fill text-primary"></i> Punto: {{ m.lat.toFixed(5) }},
+          {{ m.lng.toFixed(5) }}
+        } @else {
+          <span class="text-muted">Toca el mapa dentro de un barrio para marcar el punto.</span>
+        }
+        @if (formulario.lat().touched() && formulario.lat().invalid()) {
+          <div class="text-danger">{{ formulario.lat().errors()[0].message }}</div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <form class="card shadow-sm" (submit)="enviar($event)" novalidate>
+      <div class="card-header bg-white fw-semibold">
+        <span class="badge text-bg-dark me-1">2</span> Describe lo ocurrido
+      </div>
+      <div class="card-body">
+        @if (error()) {
+          <div class="alert alert-danger py-2">{{ error() }}</div>
+        }
+
+        <div class="mb-3">
+          <label class="form-label" for="tipo">Tipo de incidente</label>
+          <select id="tipo" class="form-select" [formField]="formulario.tipo">
+            @for (t of tipos; track t.valor) {
+              <option [value]="t.valor">{{ t.etiqueta }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="desc">Descripción</label>
+          <textarea
+            id="desc"
+            rows="4"
+            class="form-control"
+            placeholder="¿Qué pasó? Evita datos personales."
+            [formField]="formulario.descripcion"
+            [class.is-invalid]="
+              formulario.descripcion().touched() && formulario.descripcion().invalid()
+            "
+          ></textarea>
+          <div class="d-flex justify-content-between">
+            @if (formulario.descripcion().touched() && formulario.descripcion().invalid()) {
+              <div class="invalid-feedback d-block w-auto">
+                {{ formulario.descripcion().errors()[0].message }}
+              </div>
+            } @else {
+              <span></span>
+            }
+            <small class="text-muted">{{ modelo().descripcion.length }}/280</small>
+          </div>
+        </div>
+
+        <div class="alert alert-light border small">
+          Tu reporte es <strong>anónimo</strong> para los demás vecinos. Si es una emergencia, llama
+          al <strong>105</strong>.
+        </div>
+
+        <div class="d-flex gap-2">
+          <a routerLink="/" class="btn btn-outline-secondary">Cancelar</a>
+          <button class="btn btn-radar flex-grow-1" [disabled]="cargando()">
+            @if (cargando()) {
+              <span class="spinner-border spinner-border-sm"></span>
+            }
+            Enviar reporte
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

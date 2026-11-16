@@ -1,0 +1,104 @@
+<div class="d-flex align-items-center mb-3">
+  <div>
+    <h1 class="h4 mb-0">Iniciativas ciudadanas</h1>
+    <small class="text-muted"
+      >Proyectos comunitarios para recuperar espacios y fortalecer la convivencia.</small
+    >
+  </div>
+  @if (!auth.esMunicipalidad()) {
+    <a routerLink="/iniciativas/nueva" class="btn btn-radar btn-sm ms-auto"
+      ><i class="bi bi-plus-lg"></i> Proponer iniciativa</a
+    >
+  }
+</div>
+
+@if (error()) {
+  <div class="alert alert-danger py-2">{{ error() }}</div>
+}
+@if (res.isLoading()) {
+  <div class="text-center py-5"><span class="spinner-border"></span></div>
+}
+
+<div class="row g-3">
+  @for (i of iniciativas(); track i.id) {
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <span class="badge text-bg-light border">{{ i.barrio_nombre }}</span>
+            <span class="badge" [class]="badge(i.estado)">{{ i.estado }}</span>
+          </div>
+          <h2 class="h5 mt-2">{{ i.titulo }}</h2>
+          <p class="mb-2">{{ i.descripcion }}</p>
+          <p class="small mb-2">
+            <i class="bi bi-bullseye"></i> <strong>Meta:</strong> {{ i.meta }}
+          </p>
+          <p class="small mb-0"><i class="bi bi-people"></i> {{ i.participantes }} participantes</p>
+
+          @if (
+            i.estado === 'Cumplida' &&
+            i.temperatura_al_crear !== null &&
+            i.temperatura_al_cumplir !== null
+          ) {
+            <div class="row text-center mt-3 g-2">
+              <div class="col-6">
+                <div class="border rounded p-2 small">
+                  Antes
+                  <div class="fs-5 fw-semibold">{{ i.temperatura_al_crear }}</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div
+                  class="border rounded p-2 small"
+                  [class.border-success]="i.temperatura_al_cumplir < i.temperatura_al_crear"
+                >
+                  Después
+                  <div class="fs-5 fw-semibold">{{ i.temperatura_al_cumplir }}</div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        @if (!auth.esMunicipalidad()) {
+          <div class="card-footer bg-white d-flex flex-wrap gap-2">
+            @if (i.estado === 'Propuesta' || i.estado === 'En curso') {
+              <button
+                class="btn btn-sm"
+                [class]="i.participo ? 'btn-outline-secondary' : 'btn-radar'"
+                (click)="participar(i)"
+              >
+                <i class="bi" [class]="i.participo ? 'bi-person-dash' : 'bi-person-plus'"></i>
+                {{ i.participo ? 'Salirme' : 'Sumarme' }}
+              </button>
+            }
+            @if (i.es_mia && (i.estado === 'Propuesta' || i.estado === 'En curso')) {
+              <div class="ms-auto d-flex gap-1">
+                @if (i.estado === 'Propuesta') {
+                  <button
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="cambiarEstado(i, 'En curso')"
+                  >
+                    Iniciar
+                  </button>
+                }
+                <button
+                  class="btn btn-sm btn-outline-success"
+                  (click)="cambiarEstado(i, 'Cumplida')"
+                >
+                  Cumplida
+                </button>
+                <button class="btn btn-sm btn-outline-dark" (click)="cambiarEstado(i, 'Cancelada')">
+                  Cancelar
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  } @empty {
+    @if (!res.isLoading()) {
+      <p class="text-muted">Aún no hay iniciativas. ¡Propón la primera!</p>
+    }
+  }
+</div>

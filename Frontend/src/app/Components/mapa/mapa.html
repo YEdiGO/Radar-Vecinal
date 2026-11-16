@@ -1,0 +1,105 @@
+@for (a of alertas(); track a.id) {
+  <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-2">
+    <i class="bi bi-bell-fill"></i>
+    <div>
+      <strong>Alerta en {{ a.barrio_nombre }}:</strong> {{ a.motivo }}
+      @if (a.ubicacion) {
+        · {{ a.ubicacion }}
+      }
+      <span class="text-muted small">(vigente {{ minutos(a.segundos_restantes) }} min más)</span>
+    </div>
+  </div>
+}
+
+<div class="row g-3">
+  <div class="col-lg-9">
+    <div class="card shadow-sm">
+      <div class="card-header d-flex flex-wrap gap-2 align-items-center bg-white">
+        <select
+          class="form-select form-select-sm w-auto"
+          [formField]="filtros.tipo"
+          aria-label="Tipo"
+        >
+          <option value="">Todos los tipos</option>
+          @for (t of tipos; track t.valor) {
+            <option [value]="t.valor">{{ t.etiqueta }}</option>
+          }
+        </select>
+        <select
+          class="form-select form-select-sm w-auto"
+          [formField]="filtros.dias"
+          aria-label="Periodo"
+        >
+          <option value="7">Últimos 7 días</option>
+          <option value="30">Últimos 30 días</option>
+          <option value="90">Últimos 90 días</option>
+        </select>
+        @if (zonasRes.isLoading()) {
+          <span class="spinner-border spinner-border-sm text-secondary"></span>
+        }
+        @if (!auth.esMunicipalidad()) {
+          <a routerLink="/reportes/nuevo" class="btn btn-dark btn-sm ms-auto"
+            ><i class="bi bi-plus-lg"></i> Reportar</a
+          >
+        }
+      </div>
+      <app-mapa-calor [zonas]="zonas()" [puntos]="puntos()" (zonaClick)="seleccionId.set($event)" />
+      <div class="card-footer bg-white small d-flex flex-wrap gap-3">
+        <span><span class="leyenda-punto" style="background: #198754"></span> Tranquila</span>
+        <span><span class="leyenda-punto" style="background: #ffc107"></span> Atención</span>
+        <span><span class="leyenda-punto" style="background: #fd7e14"></span> Alerta</span>
+        <span><span class="leyenda-punto" style="background: #dc3545"></span> Crítica</span>
+        <span class="text-muted ms-auto">Los datos son reportes ciudadanos. Emergencias: 105</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        @if (seleccion(); as z) {
+          <div class="d-flex justify-content-between align-items-start">
+            <h2 class="h5 mb-0">{{ z.nombre }}</h2>
+            <span class="badge" [class]="badge[z.nivel]">{{ etiquetaNivel[z.nivel] }}</span>
+          </div>
+          <p class="display-6 my-2">
+            {{ z.temperatura }} <small class="fs-6 text-muted">/ 30+</small>
+          </p>
+          <p class="small text-muted mb-2">{{ z.cantidad }} reportes en el periodo</p>
+          <h3 class="h6">Incidentes recurrentes</h3>
+          @for (t of z.tipos_frecuentes; track t.tipo) {
+            <div class="small d-flex justify-content-between">
+              <span>{{ etiquetaTipo[t.tipo] }}</span
+              ><strong>{{ t.cantidad }}</strong>
+            </div>
+          } @empty {
+            <p class="small text-muted">Sin reportes recientes.</p>
+          }
+        } @else {
+          <p class="text-muted mb-0">
+            <i class="bi bi-hand-index"></i> Toca un barrio del mapa para ver su detalle.
+          </p>
+        }
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">Explorar barrios</div>
+      <ul class="list-group list-group-flush">
+        @for (z of zonas(); track z.id) {
+          <button
+            class="list-group-item list-group-item-action d-flex justify-content-between"
+            [class.active]="z.id === seleccionId()"
+            (click)="seleccionId.set(z.id)"
+          >
+            <span
+              ><span class="leyenda-punto me-2" [style.background]="color[z.nivel]"></span
+              >{{ z.nombre }}</span
+            >
+            <strong>{{ z.temperatura }}</strong>
+          </button>
+        }
+      </ul>
+    </div>
+  </div>
+</div>
