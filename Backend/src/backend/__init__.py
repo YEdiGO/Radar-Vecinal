@@ -1,1 +1,2 @@
-"""API de Radar Vecinal."""
+def main() -> None:
+    print("Hello from backend!")
